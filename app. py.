@@ -1,0 +1,37 @@
+import streamlit as st
+
+def calc_prob(colors, remaining):
+    total = 52
+    seen = total - remaining
+    k = len(colors)
+    b = colors.count("B")
+
+    # Bayesian procjena
+    p_hat = (1 + b) / (2 + k)
+    black_seen_est = min(26, p_hat * seen)
+    black_left = max(0, 26 - round(black_seen_est))
+
+    P_black = black_left / remaining if remaining > 0 else 0
+    P_red = 1 - P_black if remaining > 0 else 0
+
+    return P_black, P_red
+
+# UI
+st.set_page_config(page_title="Gamble Predictor", page_icon="🎲")
+st.title("🎲 Gamble Predictor - Procjena sljedeće boje")
+
+st.write("Unesi posljednje viđene boje i broj preostalih karata:")
+
+colors_input = st.text_input("Boje (B = Crna, R = Crvena, odvojene razmakom)", "B B R B")
+remaining = st.number_input("Koliko karata je ostalo do kraja špila?", min_value=1, max_value=52, value=9)
+
+if st.button("Izračunaj"):
+    colors = colors_input.strip().upper().split()
+    p_black, p_red = calc_prob(colors, remaining)
+
+    st.subheader("📊 Rezultat:")
+    st.success(f"Šansa za CRNU 🖤: **{p_black*100:.2f}%**")
+    st.error(f"Šansa za CRVENU ❤️: **{p_red*100:.2f}%**")
+
+    st.write("---")
+    st.caption("Ovo je procjena na osnovu zadnjih boja i broja preostalih karata. Nije garancija, samo pokazuje vjerovatnije ishode.")
